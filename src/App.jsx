@@ -599,7 +599,7 @@ export default function App() {
               Thiệp Mời Bông Hoa Ly 🌸
             </h2>
             <button className="btn-primary" onClick={startMusicAndEnter}>
-              <Gift size={20} /> Mở Thiệp Lịch Hẹn & Phát Nhạc ✨
+              <Gift size={20} /> Mở Thiệp Lịch Hẹn ✨
             </button>
           </div>
         </div>
