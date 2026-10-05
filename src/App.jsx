@@ -296,11 +296,8 @@ export default function App() {
       if (promise !== undefined) {
         promise.then(() => {
           setIsPlayingMusic(true);
-          setShowWelcomeCard(false);
-          removeInteractionListeners();
         }).catch((err) => {
-          console.log('Autoplay restriction active, waiting for user interaction:', err);
-          setShowWelcomeCard(true);
+          console.log('Autoplay restriction active, waiting for user gesture:', err);
         });
       }
     }
@@ -308,7 +305,6 @@ export default function App() {
 
   const handleUserGesture = () => {
     attemptPlayAudio();
-    triggerBalloonsAndFireworks();
   };
 
   const addInteractionListeners = () => {
