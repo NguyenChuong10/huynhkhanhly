@@ -595,12 +595,9 @@ export default function App() {
             <div className="modal-icon" style={{ background: '#ffe5ec' }}>
               💌
             </div>
-            <h2 className="modal-title" style={{ fontSize: '1.6rem' }}>
+            <h2 className="modal-title" style={{ fontSize: '1.6rem', marginBottom: '24px' }}>
               Thiệp Mời Bông Hoa Ly 🌸
             </h2>
-            <p className="modal-text" style={{ fontSize: '1rem', marginTop: '6px', marginBottom: '22px' }}>
-              Chạm vào bất kỳ đâu trên màn hình hoặc nút bên dưới để phát nhạc <b>Bèo Dạt Mây Trôi</b> nhen! 💕
-            </p>
             <button className="btn-primary" onClick={startMusicAndEnter}>
               <Gift size={20} /> Mở Thiệp Lịch Hẹn & Phát Nhạc ✨
             </button>
