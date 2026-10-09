@@ -546,15 +546,17 @@ export default function App() {
 
     // Báo tin realtime cho Chương khi Ly mở thiệp
     try {
-      fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+      fetch('https://ntfy.sh', {
         method: 'POST',
-        headers: {
-          'Title': '💌 Bông Hoa Ly vừa mở thiệp mời!',
-          'Priority': 'default',
-          'Tags': 'cherry_blossom,heart'
-        },
-        body: `Bông Hoa Ly vừa mở thiệp xem phim lúc ${new Date().toLocaleTimeString('vi-VN')}! Chuẩn bị đón tin em chọn phim nhé anh Chương ơi! 💕`
-      }).catch(() => {});
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: NTFY_TOPIC,
+          title: '💌 Bông Hoa Ly vừa mở thiệp mời!',
+          message: `Bông Hoa Ly vừa mở thiệp xem phim lúc ${new Date().toLocaleTimeString('vi-VN')}! Chuẩn bị đón tin em chọn phim nhé anh Chương ơi! 💕`,
+          tags: ['cherry_blossom', 'heart'],
+          priority: 3
+        })
+      }).catch((err) => console.warn('ntfy open notice err:', err));
     } catch (e) {}
   };
 
@@ -656,7 +658,7 @@ export default function App() {
       }
     }
 
-    // Realtime Cloud Sync & Push Notification to ntfy.sh
+    // Realtime Cloud Sync & Push Notification to ntfy.sh (JSON Body support UTF-8 & Emoji)
     try {
       const readableNotice = 
         `🎉 BÔNG HOA LY ĐÃ CHỌN LỊCH PHIM CGV!\n\n` +
@@ -669,14 +671,16 @@ export default function App() {
 
       const ntfyPayload = `${readableNotice}\n\n---DATA---\n${JSON.stringify(newSubmission)}`;
 
-      await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+      await fetch('https://ntfy.sh', {
         method: 'POST',
-        headers: {
-          'Title': `🎬 Ly đã chọn phim: ${chosenMovieObj?.title}`,
-          'Priority': 'urgent',
-          'Tags': 'tada,popcorn,clapper,heart'
-        },
-        body: ntfyPayload
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: NTFY_TOPIC,
+          title: `🎬 Ly đã chọn: ${chosenMovieObj?.title || 'Phim CGV'}`,
+          message: ntfyPayload,
+          tags: ['tada', 'popcorn', 'clapper', 'heart'],
+          priority: 4
+        })
       });
     } catch (err) {
       console.warn('ntfy push failed:', err);
