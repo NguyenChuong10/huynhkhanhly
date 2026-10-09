@@ -385,6 +385,13 @@ export default function App() {
         const lines = text.trim().split('\n').filter(Boolean);
         const cloudItems = [];
 
+        let deletedIds = new Set();
+        let clearedAt = 0;
+        try {
+          deletedIds = new Set(JSON.parse(localStorage.getItem('bong_hoa_ly_deleted_ids') || '[]'));
+          clearedAt = parseInt(localStorage.getItem('bong_hoa_ly_cleared_at') || '0', 10);
+        } catch (e) {}
+
         for (const line of lines) {
           try {
             const parsed = JSON.parse(line);
@@ -392,7 +399,9 @@ export default function App() {
               const jsonStr = parsed.message.split('---DATA---')[1].trim();
               const subObj = JSON.parse(jsonStr);
               if (subObj && subObj.id) {
-                cloudItems.push(subObj);
+                if (!deletedIds.has(subObj.id) && (!clearedAt || subObj.id > clearedAt)) {
+                  cloudItems.push(subObj);
+                }
               }
             }
           } catch (e) {
@@ -400,15 +409,18 @@ export default function App() {
           }
         }
 
-        if (cloudItems.length > 0) {
-          setStoredSubmissions(prev => {
-            const existingIds = new Set(prev.map(item => item.id));
-            const newUniqueItems = cloudItems.filter(item => !existingIds.has(item.id));
-            const merged = [...newUniqueItems, ...prev].sort((a, b) => (b.id || 0) - (a.id || 0));
+        setStoredSubmissions(prev => {
+          const filteredPrev = prev.filter(item => !deletedIds.has(item.id) && (!clearedAt || item.id > clearedAt));
+          const existingIds = new Set(filteredPrev.map(item => item.id));
+          const newUniqueItems = cloudItems.filter(item => !existingIds.has(item.id));
+          const merged = [...newUniqueItems, ...filteredPrev].sort((a, b) => (b.id || 0) - (a.id || 0));
+          if (merged.length > 0) {
             localStorage.setItem('bong_hoa_ly_date_choices', JSON.stringify(merged));
-            return merged;
-          });
-        }
+          } else {
+            localStorage.removeItem('bong_hoa_ly_date_choices');
+          }
+          return merged;
+        });
       }
       setLastSyncedTime(new Date().toLocaleTimeString('vi-VN'));
     } catch (err) {
@@ -507,9 +519,25 @@ export default function App() {
 
   useEffect(() => {
     const saved = localStorage.getItem('bong_hoa_ly_date_choices');
+    let deletedIds = new Set();
+    let clearedAt = 0;
+    try {
+      deletedIds = new Set(JSON.parse(localStorage.getItem('bong_hoa_ly_deleted_ids') || '[]'));
+      clearedAt = parseInt(localStorage.getItem('bong_hoa_ly_cleared_at') || '0', 10);
+    } catch (e) {}
+
     if (saved) {
       try {
-        setStoredSubmissions(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        const valid = parsed.filter(item => !deletedIds.has(item.id) && (!clearedAt || item.id > clearedAt));
+        setStoredSubmissions(valid);
+        if (valid.length !== parsed.length) {
+          if (valid.length > 0) {
+            localStorage.setItem('bong_hoa_ly_date_choices', JSON.stringify(valid));
+          } else {
+            localStorage.removeItem('bong_hoa_ly_date_choices');
+          }
+        }
       } catch (e) {
         console.error(e);
       }
@@ -719,9 +747,31 @@ export default function App() {
     } else {
       localStorage.removeItem('bong_hoa_ly_date_choices');
     }
+
+    if (id) {
+      try {
+        const existingDeleted = JSON.parse(localStorage.getItem('bong_hoa_ly_deleted_ids') || '[]');
+        if (!existingDeleted.includes(id)) {
+          existingDeleted.push(id);
+          localStorage.setItem('bong_hoa_ly_deleted_ids', JSON.stringify(existingDeleted));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
   const clearAllSubmissions = () => {
+    const now = Date.now();
+    const currentIds = storedSubmissions.map(item => item.id).filter(Boolean);
+    try {
+      const existingDeleted = JSON.parse(localStorage.getItem('bong_hoa_ly_deleted_ids') || '[]');
+      const updatedDeleted = Array.from(new Set([...existingDeleted, ...currentIds]));
+      localStorage.setItem('bong_hoa_ly_deleted_ids', JSON.stringify(updatedDeleted));
+    } catch (e) {
+      console.error(e);
+    }
+    localStorage.setItem('bong_hoa_ly_cleared_at', now.toString());
     localStorage.removeItem('bong_hoa_ly_date_choices');
     setStoredSubmissions([]);
   };
