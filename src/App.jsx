@@ -17,9 +17,14 @@ import {
   MapPin,
   Ticket,
   Music,
-  Gift
+  Gift,
+  RefreshCw,
+  Bell,
+  ExternalLink
 } from 'lucide-react';
 import { playPopChime, playLoveFanfare } from './utils/audio';
+
+const NTFY_TOPIC = 'bonghoaly_cgv_date_chuong2206';
 
 // CGV Vincom Đà Nẵng Schedule exact per day from user's screenshots
 const CGV_DATES = [
@@ -363,10 +368,55 @@ export default function App() {
   const [copiedNotice, setCopiedNotice] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState('');
   const [activeBalloons, setActiveBalloons] = useState([]);
+  const [isLoadingCloud, setIsLoadingCloud] = useState(false);
+  const [lastSyncedTime, setLastSyncedTime] = useState(null);
 
   const audioRef = useRef(null);
 
   const floatingItems = ['🎈', '🌸', '💖', '🌷', '✨', '🎈', '🍿', '🎬', '🎈', '🌺', '💕', '🎈'];
+
+  // Fetch real-time Cloud submissions from ntfy topic
+  const fetchCloudSubmissions = async () => {
+    setIsLoadingCloud(true);
+    try {
+      const res = await fetch(`https://ntfy.sh/${NTFY_TOPIC}/json?poll=1`);
+      if (res.ok) {
+        const text = await res.text();
+        const lines = text.trim().split('\n').filter(Boolean);
+        const cloudItems = [];
+
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line);
+            if (parsed.message && parsed.message.includes('---DATA---')) {
+              const jsonStr = parsed.message.split('---DATA---')[1].trim();
+              const subObj = JSON.parse(jsonStr);
+              if (subObj && subObj.id) {
+                cloudItems.push(subObj);
+              }
+            }
+          } catch (e) {
+            // ignore non-data messages
+          }
+        }
+
+        if (cloudItems.length > 0) {
+          setStoredSubmissions(prev => {
+            const existingIds = new Set(prev.map(item => item.id));
+            const newUniqueItems = cloudItems.filter(item => !existingIds.has(item.id));
+            const merged = [...newUniqueItems, ...prev].sort((a, b) => (b.id || 0) - (a.id || 0));
+            localStorage.setItem('bong_hoa_ly_date_choices', JSON.stringify(merged));
+            return merged;
+          });
+        }
+      }
+      setLastSyncedTime(new Date().toLocaleTimeString('vi-VN'));
+    } catch (err) {
+      console.warn('Lỗi đồng bộ Cloud:', err);
+    } finally {
+      setIsLoadingCloud(false);
+    }
+  };
 
   const triggerBalloonsAndFireworks = () => {
     // 1. Floating balloons
@@ -467,6 +517,9 @@ export default function App() {
     const savedWebhook = localStorage.getItem('ly_webhook_url');
     if (savedWebhook) setWebhookUrl(savedWebhook);
 
+    // Initial Cloud Fetch
+    fetchCloudSubmissions();
+
     // Try playing immediately
     attemptPlayAudio();
 
@@ -478,11 +531,31 @@ export default function App() {
     };
   }, []);
 
+  // Poll cloud submissions whenever Admin Dashboard is opened
+  useEffect(() => {
+    if (showAdminModal) {
+      fetchCloudSubmissions();
+    }
+  }, [showAdminModal]);
+
   const startMusicAndEnter = () => {
     if (soundEnabled) playPopChime();
     attemptPlayAudio();
     setShowWelcomeCard(false);
     triggerBalloonsAndFireworks();
+
+    // Báo tin realtime cho Chương khi Ly mở thiệp
+    try {
+      fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        headers: {
+          'Title': '💌 Bông Hoa Ly vừa mở thiệp mời!',
+          'Priority': 'default',
+          'Tags': 'cherry_blossom,heart'
+        },
+        body: `Bông Hoa Ly vừa mở thiệp xem phim lúc ${new Date().toLocaleTimeString('vi-VN')}! Chuẩn bị đón tin em chọn phim nhé anh Chương ơi! 💕`
+      }).catch(() => {});
+    } catch (e) {}
   };
 
   const toggleMusic = () => {
@@ -581,6 +654,32 @@ export default function App() {
       } catch (err) {
         console.log('Webhook push skipped:', err);
       }
+    }
+
+    // Realtime Cloud Sync & Push Notification to ntfy.sh
+    try {
+      const readableNotice = 
+        `🎉 BÔNG HOA LY ĐÃ CHỌN LỊCH PHIM CGV!\n\n` +
+        `📅 Ngày: ${currentDayObj.fullDate}\n` +
+        `🎬 Phim: ${chosenMovieObj?.title}\n` +
+        `⏰ Suất chiếu: ${selectedTime}\n` +
+        `📍 Rạp: CGV Vincom Đà Nẵng\n` +
+        `🍿 Bắp nước: ${chosenSnackNames.join(', ') || 'Không chọn'}\n` +
+        `💌 Lời nhắn: "${personalMessage || 'Chương đẹp trai nhớ đón em đúng giờ!'}"`;
+
+      const ntfyPayload = `${readableNotice}\n\n---DATA---\n${JSON.stringify(newSubmission)}`;
+
+      await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        headers: {
+          'Title': `🎬 Ly đã chọn phim: ${chosenMovieObj?.title}`,
+          'Priority': 'urgent',
+          'Tags': 'tada,popcorn,clapper,heart'
+        },
+        body: ntfyPayload
+      });
+    } catch (err) {
+      console.warn('ntfy push failed:', err);
     }
 
     setIsSubmitted(true);
@@ -1016,9 +1115,93 @@ export default function App() {
               </button>
             </div>
 
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
               Đây là nơi xem tất cả các phản hồi của Bông Hoa Ly khi chọn lịch xem phim.
             </p>
+
+            {/* Realtime Cloud Sync Bar */}
+            <div style={{
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '12px',
+              padding: '10px 14px',
+              marginBottom: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px'
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold', fontSize: '0.85rem', color: '#166534' }}>
+                  <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></span>
+                  Cloud Sync Tự Động (ntfy.sh)
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#15803d', marginTop: '2px' }}>
+                  {lastSyncedTime ? `Đã đồng bộ lúc: ${lastSyncedTime}` : 'Đang kết nối Cloud...'}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={fetchCloudSubmissions}
+                disabled={isLoadingCloud}
+                style={{
+                  background: '#22c55e',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '6px 12px',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  cursor: isLoadingCloud ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <RefreshCw size={13} className={isLoadingCloud ? 'spin' : ''} />
+                {isLoadingCloud ? 'Đang tải...' : 'Làm mới'}
+              </button>
+            </div>
+
+            {/* Quick Link to Phone Notifications */}
+            <div style={{
+              background: '#fdf2f8',
+              border: '1px dashed #f472b6',
+              borderRadius: '12px',
+              padding: '10px 14px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '8px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Bell size={18} color="#db2777" />
+                <span style={{ fontSize: '0.82rem', color: '#831843' }}>
+                  Nhận báo Ting Ting về điện thoại:
+                </span>
+              </div>
+              <a
+                href={`https://ntfy.sh/${NTFY_TOPIC}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  color: '#db2777',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  background: '#fff',
+                  border: '1px solid #fbcfe8'
+                }}
+              >
+                Mở Kênh Chuông <ExternalLink size={12} />
+              </a>
+            </div>
 
             {storedSubmissions.length === 0 ? (
               <div style={{ padding: '30px 10px', textAlign: 'center', color: '#888' }}>
