@@ -403,7 +403,7 @@ export default function App() {
 
     if (soundEnabled) playLoveFanfare();
     
-    triggerBalloons();
+    triggerBalloonsAndFireworks();
 
     confetti({
       particleCount: 120,
