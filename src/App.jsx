@@ -23,13 +23,13 @@ import { playPopChime, playLoveFanfare } from './utils/audio';
 
 // CGV Vincom Đà Nẵng Schedule exact per day from user's screenshots
 const CGV_DATES = [
-  { id: 'mon-05', dayName: 'Mon', num: '05', fullDate: 'Thứ Hai (05/10)' },
-  { id: 'tue-06', dayName: 'Tue', num: '06', fullDate: 'Thứ Ba (06/10)' },
-  { id: 'wed-07', dayName: 'Wed', num: '07', fullDate: 'Thứ Tư (07/10)' },
-  { id: 'thu-08', dayName: 'Thu', num: '08', fullDate: 'Thứ Năm (08/10)' },
   { id: 'fri-09', dayName: 'Fri', num: '09', fullDate: 'Thứ Sáu (09/10)' },
   { id: 'sat-10', dayName: 'Sat', num: '10', fullDate: 'Thứ Bảy (10/10)' },
-  { id: 'sun-11', dayName: 'Sun', num: '11', fullDate: 'Chủ Nhật (11/10)' }
+  { id: 'sun-11', dayName: 'Sun', num: '11', fullDate: 'Chủ Nhật (11/10)' },
+  { id: 'mon-12', dayName: 'Mon', num: '12', fullDate: 'Thứ Hai (12/10)' },
+  { id: 'tue-13', dayName: 'Tue', num: '13', fullDate: 'Thứ Ba (13/10)' },
+  { id: 'wed-14', dayName: 'Wed', num: '14', fullDate: 'Thứ Tư (14/10)' },
+  { id: 'thu-15', dayName: 'Thu', num: '15', fullDate: 'Thứ Năm (15/10)' }
 ];
 
 // Movie dictionary with user's uploaded poster images
@@ -39,6 +39,18 @@ const MOVIES_DICT = {
     rating: 'T18',
     format: '2D Phụ Đề Anh & Việt',
     poster: '/assets/posters/trai_buon_nguoi.png'
+  },
+  'an-mang-xem-hoan-hao': {
+    title: 'ÁN MẠNG XÉM HOÀN HẢO',
+    rating: 'T18',
+    format: '2D Phụ Đề Anh',
+    poster: '/assets/posters/an_mang_xem_hoan_hao.png'
+  },
+  'nguoi-me-khac': {
+    title: 'NGƯỜI MẸ KHÁC',
+    rating: 'T18',
+    format: '2D Phụ Đề Việt',
+    poster: '/assets/posters/nguoi_me_khac.png'
   },
   'avengers': {
     title: 'AVENGERS: HỒI KẾT - PHIÊN BẢN ĐẶC BIỆT',
@@ -75,114 +87,86 @@ const MOVIES_DICT = {
     rating: 'P',
     format: '2D Phụ Đề Anh & Việt',
     poster: '/assets/posters/suzume.png'
+  },
+  'chuyen-cong-chua-kaguya': {
+    title: 'CHUYỆN CÔNG CHÚA KAGUYA',
+    rating: 'K',
+    format: '2D Phụ Đề Việt',
+    poster: '/assets/posters/chuyen_cong_chua_kaguya.png'
+  },
+  'shaun-the-sheep': {
+    title: 'SHAUN THE SHEEP: "QUÁI LẠ" GHÉ NHÀ',
+    rating: 'P',
+    format: '2D Phụ Đề Việt',
+    poster: '/assets/posters/shaun_the_sheep.png'
+  },
+  'quy-an-tang-4': {
+    title: 'QUỶ ĂN TẠNG 4: HỔ TINH',
+    rating: 'T18',
+    format: '2D Phụ Đề Anh & Việt',
+    poster: '/assets/posters/quy_an_tang_4.png'
+  },
+  'street-fighter': {
+    title: 'PHIM STREET FIGHTER',
+    rating: 'T16',
+    format: '2D Phụ Đề Việt',
+    poster: '/assets/posters/street_fighter.png'
   }
 };
 
-// Exact movies and showtimes mapping by selected day
+// Exact movies and showtimes mapping by selected day (Starting 09/10/2026)
 const SCHEDULE_BY_DAY = {
-  'mon-05': [
-    {
-      ...MOVIES_DICT['trai-buon-nguoi'],
-      id: 'trai-buon-nguoi',
-      showtimes: ['21:15', '21:45']
-    },
-    {
-      ...MOVIES_DICT['quyet-cua-anh-nay'],
-      id: 'quyet-cua-anh-nay',
-      showtimes: ['22:10']
-    }
-  ],
-  'tue-06': [
-    {
-      ...MOVIES_DICT['trai-buon-nguoi'],
-      id: 'trai-buon-nguoi',
-      showtimes: [
-        '08:30', '09:00', '09:40', '10:15', '11:10', '11:40', 
-        '12:15', '12:50', '13:45', '14:15', '14:50', '15:30', 
-        '16:20', '18:10', '19:00', '19:30', '20:20', '20:50', '21:15', '21:45'
-      ]
-    },
-    {
-      ...MOVIES_DICT['avengers'],
-      id: 'avengers',
-      showtimes: ['16:50']
-    },
-    {
-      ...MOVIES_DICT['trai-tim-quai-thu'],
-      id: 'trai-tim-quai-thu',
-      showtimes: ['17:25', '19:10', '22:10']
-    },
-    {
-      ...MOVIES_DICT['scotty'],
-      id: 'scotty',
-      showtimes: ['08:35']
-    },
-    {
-      ...MOVIES_DICT['chung-quy'],
-      id: 'chung-quy',
-      showtimes: ['14:30']
-    },
-    {
-      ...MOVIES_DICT['suzume'],
-      id: 'suzume',
-      showtimes: ['16:40']
-    },
-    {
-      ...MOVIES_DICT['quyet-cua-anh-nay'],
-      id: 'quyet-cua-anh-nay',
-      showtimes: ['09:30']
-    }
-  ],
-  'wed-07': [
-    {
-      ...MOVIES_DICT['trai-buon-nguoi'],
-      id: 'trai-buon-nguoi',
-      showtimes: [
-        '08:30', '09:00', '09:40', '10:10', '10:40', '11:10', '11:40', 
-        '12:15', '12:50', '13:20', '13:45', '14:15', '14:50', '15:30', 
-        '16:20', '18:10', '19:00', '19:30', '20:20', '20:50', '21:15', '21:45'
-      ]
-    },
-    {
-      ...MOVIES_DICT['avengers'],
-      id: 'avengers',
-      showtimes: ['16:50']
-    }
-  ],
-  'thu-08': [
-    {
-      ...MOVIES_DICT['trai-buon-nguoi'],
-      id: 'trai-buon-nguoi',
-      showtimes: ['18:10', '19:00', '19:30', '20:20', '20:50', '21:15', '21:45']
-    },
-    {
-      ...MOVIES_DICT['trai-tim-quai-thu'],
-      id: 'trai-tim-quai-thu',
-      showtimes: ['17:25', '19:10', '22:10']
-    }
-  ],
   'fri-09': [
     {
       ...MOVIES_DICT['trai-buon-nguoi'],
       id: 'trai-buon-nguoi',
-      showtimes: ['18:00', '19:20', '20:00', '20:40', '21:30', '22:00']
+      showtimes: ['19:20', '20:00', '20:40', '21:20', '22:00']
     },
     {
-      ...MOVIES_DICT['chung-quy'],
-      id: 'chung-quy',
-      showtimes: ['20:05']
+      ...MOVIES_DICT['an-mang-xem-hoan-hao'],
+      id: 'an-mang-xem-hoan-hao',
+      showtimes: ['20:50']
+    },
+    {
+      ...MOVIES_DICT['nguoi-me-khac'],
+      id: 'nguoi-me-khac',
+      showtimes: ['22:40']
     }
   ],
   'sat-10': [
     {
       ...MOVIES_DICT['trai-buon-nguoi'],
       id: 'trai-buon-nguoi',
-      showtimes: ['18:00', '19:20', '20:00', '20:40', '21:30', '22:00']
+      showtimes: [
+        '08:55', '09:30', '10:10', '11:00', '11:35', '12:10', '12:45', 
+        '13:35', '14:10', '14:45', '15:20', '16:10', '16:45', '17:20', 
+        '18:00', '19:20', '20:00', '20:40', '21:30', '22:00'
+      ]
+    },
+    {
+      ...MOVIES_DICT['nguoi-me-khac'],
+      id: 'nguoi-me-khac',
+      showtimes: ['12:00', '18:50', '22:40']
+    },
+    {
+      ...MOVIES_DICT['an-mang-xem-hoan-hao'],
+      id: 'an-mang-xem-hoan-hao',
+      showtimes: ['20:50']
+    },
+    {
+      ...MOVIES_DICT['chuyen-cong-chua-kaguya'],
+      id: 'chuyen-cong-chua-kaguya',
+      showtimes: ['09:20', '13:50', '16:30']
     },
     {
       ...MOVIES_DICT['chung-quy'],
       id: 'chung-quy',
-      showtimes: ['20:05']
+      showtimes: ['09:05']
+    },
+    {
+      ...MOVIES_DICT['shaun-the-sheep'],
+      id: 'shaun-the-sheep',
+      showtimes: ['19:30']
     }
   ],
   'sun-11': [
@@ -190,15 +174,167 @@ const SCHEDULE_BY_DAY = {
       ...MOVIES_DICT['trai-buon-nguoi'],
       id: 'trai-buon-nguoi',
       showtimes: [
-        '09:30', '10:10', '11:00', '11:35', '12:10', '12:45', '13:35', 
-        '14:10', '14:45', '16:10', '16:45', '17:20', '18:00', '19:20', 
-        '20:00', '20:40', '21:30', '22:00'
+        '09:30', '10:10', '11:00', '11:35', '12:10', '12:45', 
+        '13:35', '13:55', '14:10', '14:45', '15:20', '16:10', 
+        '16:45', '17:20', '18:00', '19:20', '20:00', '20:40', 
+        '21:30', '22:00'
       ]
+    },
+    {
+      ...MOVIES_DICT['nguoi-me-khac'],
+      id: 'nguoi-me-khac',
+      showtimes: ['12:00', '18:50', '22:40']
+    },
+    {
+      ...MOVIES_DICT['an-mang-xem-hoan-hao'],
+      id: 'an-mang-xem-hoan-hao',
+      showtimes: ['20:50']
+    },
+    {
+      ...MOVIES_DICT['chuyen-cong-chua-kaguya'],
+      id: 'chuyen-cong-chua-kaguya',
+      showtimes: ['09:15', '16:30']
     },
     {
       ...MOVIES_DICT['chung-quy'],
       id: 'chung-quy',
-      showtimes: ['20:05']
+      showtimes: ['09:05']
+    },
+    {
+      ...MOVIES_DICT['shaun-the-sheep'],
+      id: 'shaun-the-sheep',
+      showtimes: ['09:15', '19:30']
+    }
+  ],
+  'mon-12': [
+    {
+      ...MOVIES_DICT['trai-buon-nguoi'],
+      id: 'trai-buon-nguoi',
+      showtimes: [
+        '09:30', '10:10', '11:00', '11:35', '12:10', '12:45', 
+        '13:35', '14:10', '14:45', '15:20', '15:45', '16:10', 
+        '16:45', '17:20', '18:00', '19:20', '20:00', '20:40', 
+        '21:20', '22:00'
+      ]
+    },
+    {
+      ...MOVIES_DICT['nguoi-me-khac'],
+      id: 'nguoi-me-khac',
+      showtimes: ['09:40', '12:00', '13:50', '18:50', '22:40']
+    },
+    {
+      ...MOVIES_DICT['an-mang-xem-hoan-hao'],
+      id: 'an-mang-xem-hoan-hao',
+      showtimes: ['20:50']
+    },
+    {
+      ...MOVIES_DICT['chuyen-cong-chua-kaguya'],
+      id: 'chuyen-cong-chua-kaguya',
+      showtimes: ['09:15', '18:40']
+    },
+    {
+      ...MOVIES_DICT['chung-quy'],
+      id: 'chung-quy',
+      showtimes: ['09:05']
+    }
+  ],
+  'tue-13': [
+    {
+      ...MOVIES_DICT['trai-buon-nguoi'],
+      id: 'trai-buon-nguoi',
+      showtimes: [
+        '09:30', '10:10', '11:00', '11:35', '12:10', '12:45', 
+        '13:35', '14:10', '14:45', '15:20', '16:10', '16:45', 
+        '17:20', '18:00', '18:50', '19:20', '20:00', '20:40', 
+        '21:20', '22:00'
+      ]
+    },
+    {
+      ...MOVIES_DICT['nguoi-me-khac'],
+      id: 'nguoi-me-khac',
+      showtimes: ['09:40', '12:00', '19:25', '22:40']
+    },
+    {
+      ...MOVIES_DICT['an-mang-xem-hoan-hao'],
+      id: 'an-mang-xem-hoan-hao',
+      showtimes: ['14:00', '21:30']
+    },
+    {
+      ...MOVIES_DICT['chuyen-cong-chua-kaguya'],
+      id: 'chuyen-cong-chua-kaguya',
+      showtimes: ['09:15']
+    },
+    {
+      ...MOVIES_DICT['chung-quy'],
+      id: 'chung-quy',
+      showtimes: ['09:05']
+    }
+  ],
+  'wed-14': [
+    {
+      ...MOVIES_DICT['trai-buon-nguoi'],
+      id: 'trai-buon-nguoi',
+      showtimes: [
+        '09:30', '10:10', '11:10', '12:10', '12:45', '14:10', 
+        '14:45', '15:20', '16:10', '16:45', '17:20', '18:00', 
+        '18:40', '19:20', '20:00', '20:40', '21:20', '22:00'
+      ]
+    },
+    {
+      ...MOVIES_DICT['nguoi-me-khac'],
+      id: 'nguoi-me-khac',
+      showtimes: ['12:00']
+    },
+    {
+      ...MOVIES_DICT['an-mang-xem-hoan-hao'],
+      id: 'an-mang-xem-hoan-hao',
+      showtimes: ['14:00']
+    },
+    {
+      ...MOVIES_DICT['chuyen-cong-chua-kaguya'],
+      id: 'chuyen-cong-chua-kaguya',
+      showtimes: ['09:15']
+    },
+    {
+      ...MOVIES_DICT['quy-an-tang-4'],
+      id: 'quy-an-tang-4',
+      showtimes: ['09:00', '09:50', '12:00', '13:50', '16:30', '18:50', '21:00', '22:35']
+    }
+  ],
+  'thu-15': [
+    {
+      ...MOVIES_DICT['trai-buon-nguoi'],
+      id: 'trai-buon-nguoi',
+      showtimes: [
+        '09:30', '10:10', '11:10', '12:10', '12:45', '14:10', 
+        '14:45', '15:20', '16:10', '16:45', '17:20', '18:00', 
+        '18:40', '19:20', '20:00', '20:40', '21:20'
+      ]
+    },
+    {
+      ...MOVIES_DICT['nguoi-me-khac'],
+      id: 'nguoi-me-khac',
+      showtimes: ['12:00']
+    },
+    {
+      ...MOVIES_DICT['an-mang-xem-hoan-hao'],
+      id: 'an-mang-xem-hoan-hao',
+      showtimes: ['14:00']
+    },
+    {
+      ...MOVIES_DICT['chuyen-cong-chua-kaguya'],
+      id: 'chuyen-cong-chua-kaguya',
+      showtimes: ['09:15']
+    },
+    {
+      ...MOVIES_DICT['quy-an-tang-4'],
+      id: 'quy-an-tang-4',
+      showtimes: ['09:00', '09:50', '12:00', '13:50', '16:30', '18:50', '22:35']
+    },
+    {
+      ...MOVIES_DICT['street-fighter'],
+      id: 'street-fighter',
+      showtimes: ['21:00']
     }
   ]
 };
@@ -211,9 +347,9 @@ const SNACKS_LIST = [
 ];
 
 export default function App() {
-  const [selectedDayId, setSelectedDayId] = useState('tue-06');
+  const [selectedDayId, setSelectedDayId] = useState('fri-09');
   const [selectedMovieId, setSelectedMovieId] = useState('trai-buon-nguoi');
-  const [selectedTime, setSelectedTime] = useState('19:30');
+  const [selectedTime, setSelectedTime] = useState('19:20');
   const [selectedSnacks, setSelectedSnacks] = useState(['popcorn', 'boba']);
   const [personalMessage, setPersonalMessage] = useState('');
   
@@ -364,13 +500,13 @@ export default function App() {
     }
   };
 
-  const currentDayObj = CGV_DATES.find(d => d.id === selectedDayId) || CGV_DATES[1];
-  const currentMoviesList = SCHEDULE_BY_DAY[selectedDayId] || SCHEDULE_BY_DAY['tue-06'];
+  const currentDayObj = CGV_DATES.find(d => d.id === selectedDayId) || CGV_DATES[0];
+  const currentMoviesList = SCHEDULE_BY_DAY[selectedDayId] || SCHEDULE_BY_DAY['fri-09'];
 
   const handleSelectDay = (dayId) => {
     if (soundEnabled) playPopChime();
     setSelectedDayId(dayId);
-    const dayMovies = SCHEDULE_BY_DAY[dayId] || SCHEDULE_BY_DAY['tue-06'];
+    const dayMovies = SCHEDULE_BY_DAY[dayId] || SCHEDULE_BY_DAY['fri-09'];
     if (dayMovies && dayMovies[0]) {
       setSelectedMovieId(dayMovies[0].id);
       if (dayMovies[0].showtimes && dayMovies[0].showtimes[0]) {
@@ -638,7 +774,7 @@ export default function App() {
               </div>
               <div>
                 <h2 className="section-title">1. Chọn Ngày Bông Hoa Ly Rảnh Đi Xem</h2>
-                <p className="section-desc">Lịch chiếu thực tế tại CGV Vincom Đà Nẵng từ 05/10 đến 11/10</p>
+                <p className="section-desc">Lịch chiếu thực tế tại CGV Vincom Đà Nẵng từ 09/10 đến 15/10</p>
               </div>
             </div>
 
